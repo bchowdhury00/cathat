@@ -25,6 +25,7 @@ n            double depth
 void add_box( struct matrix * edges,
               double x, double y, double z,
               double width, double height, double depth ) {
+  add_edge(edges,x,y,z,)
 }
 
 /*======== void add_sphere() ==========
@@ -46,6 +47,9 @@ void add_box( struct matrix * edges,
 void add_sphere( struct matrix * edges, 
                  double cx, double cy, double cz,
                  double r, int step ) {
+  int n;
+  for (n = 0; n < step; n++){
+  }
   return;
 }
 
