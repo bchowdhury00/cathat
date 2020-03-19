@@ -22,14 +22,13 @@ The file follows the following format:
      Any command that requires arguments must have those arguments in the second line.
      The commands are as follows:
 
-         sphere: add a sphere to the edge matrix - 
+         sphere: add a sphere to the edge matrix -
                  takes 4 arguemnts (cx, cy, cz, r)
-         torus: add a torus to the edge matrix - 
+         torus: add a torus to the edge matrix -
                 takes 5 arguemnts (cx, cy, cz, r1, r2)
-         box: add a rectangular prism to the edge matrix - 
+         box: add a rectangular prism to the edge matrix -
               takes 6 arguemnts (x, y, z, width, height, depth)
          clear: clears the edge matrix
-
          circle: add a circle to the edge matrix -
                  takes 4 arguments (cx, cy, cz, r)
          hermite: add a hermite curve to the edge matrix -
@@ -78,12 +77,12 @@ void parse_file ( char * filename,
   c.red = 0;
   c.green = 255;
   c.blue = 255;
-  
-  if ( strcmp(filename, "stdin") == 0 ) 
+
+  if ( strcmp(filename, "stdin") == 0 )
     f = stdin;
   else
     f = fopen(filename, "r");
-  
+
   while ( fgets(line, sizeof(line), f) != NULL ) {
     line[strlen(line)-1]='\0';
     //printf(":%s:\n",line);
@@ -92,7 +91,7 @@ void parse_file ( char * filename,
     double yvals[4];
     double zvals[4];
     struct matrix *tmp;
-    double r;
+    double r,r2;
     double theta;
     char axis;
     int type;
@@ -112,7 +111,7 @@ void parse_file ( char * filename,
         type = HERMITE;
       else
         type = BEZIER;
-      
+
       fgets(line, sizeof(line), f);
       //printf("CURVE\t%s", line);
 
@@ -124,7 +123,7 @@ void parse_file ( char * filename,
           /*       xvals[1], yvals[1], */
           /*       xvals[2], yvals[2], */
           /*       xvals[3], yvals[3]); */
-      
+
           //printf("%d\n", type);
           add_curve( edges, xvals[0], yvals[0], xvals[1], yvals[1],
                      xvals[2], yvals[2], xvals[3], yvals[3], step, type);
@@ -164,7 +163,25 @@ void parse_file ( char * filename,
       tmp = make_translate( xvals[0], yvals[0], zvals[0]);
       matrix_mult(tmp, transform);
     }//end translate
-
+    else if ( strncmp(line, "box", strlen(line)) == 0 ) {
+        fgets(line, sizeof(line), f);
+        //printf("MOVE\t%s", line);
+        sscanf(line, "%lf %lf %lf %lf %lf %lf",
+        xvals, yvals, zvals, xvals + 1, yvals + 1, zvals + 1);
+        add_box(edges, xvals[0], yvals[0], zvals[0], xvals[1], yvals[1], zvals[1]);
+    }//end box
+    else if ( strncmp(line, "sphere", strlen(line)) == 0 ) {
+        fgets(line, sizeof(line), f);
+        sscanf(line, "%lf %lf %lf %lf",
+               xvals, yvals, zvals, &r);
+        add_sphere(edges, xvals[0], yvals[0], zvals[0], r, step);
+    }
+    else if ( strncmp(line, "torus", strlen(line)) == 0 ) {
+        fgets(line, sizeof(line), f);
+        sscanf(line, "%lf %lf %lf %lf %lf",
+               xvals, yvals, zvals, &r, &r2);
+        add_torus(edges, xvals[0], yvals[0], zvals[0], r ,r2, step);
+    }
     else if ( strncmp(line, "rotate", strlen(line)) == 0 ) {
       fgets(line, sizeof(line), f);
       //printf("Rotate\t%s", line);
@@ -198,6 +215,11 @@ void parse_file ( char * filename,
       clear_screen(s);
       draw_lines(edges, s, c);
       display( s );
+    }//end display
+
+    else if ( strncmp(line, "clear", strlen(line)) == 0 ) {
+      //printf("DISPLAY\t%s", line);
+      edges->lastcol = 0;
     }//end display
 
     else if ( strncmp(line, "save", strlen(line)) == 0 ) {
